@@ -9,7 +9,10 @@ Author:
 """
 
 
-def Model(object):
+__all__ = ['Model']
+
+
+class Model(object):
 
     """
     A generic model class.
@@ -54,5 +57,44 @@ def Model(object):
     def log_prior(self):
         """
         Retutnr the log prior of the model at the current state.
+        """
+        raise NotImplementedError('Implement this.')
+
+    @property
+    def num_params(self):
+        """
+        Return the number of parameters.
+        """
+        raise NotImplementedError('Implement this.')
+
+    @property
+    def params(self):
+        """
+        Set/Get the parameters.
+        """
+        raise NotImplementedError('Implement this.')
+
+    @params.setter
+    def params(self, value):
+        raise NotImplementedError('Implement this.')
+
+    @property
+    def param_name(self):
+        """
+        Return a list containing the names of the parameters.
+        """
+        raise NotImplementedError('Implement this.')
+
+    @property
+    def grad_log_likelihood(self):
+        """
+        Return the gradient of the log likelihood.
+        """
+        raise NotImplementedError('Implement this.')
+
+    @property
+    def grad_log_prior(self):
+        """
+        Return the gradient of the log prior.
         """
         raise NotImplementedError('Implement this.')
