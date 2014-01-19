@@ -21,7 +21,7 @@ class Model(object):
     :type name:     str
     """
 
-    def __init__(self, name='The model class'):
+    def __init__(self, name='Pymcmc Model'):
         """
         Initialize the object.
         """
@@ -79,7 +79,7 @@ class Model(object):
         raise NotImplementedError('Implement this.')
 
     @property
-    def param_name(self):
+    def param_names(self):
         """
         Return a list containing the names of the parameters.
         """
@@ -98,3 +98,12 @@ class Model(object):
         Return the gradient of the log prior.
         """
         raise NotImplementedError('Implement this.')
+
+    def __str__(self):
+        """
+        Return a string representation of the object.
+        """
+        s = 'Model name:\t' + self.__name__ + '\n'
+        s += 'num_param:\t' + str(self.num_params) + '\n'
+        s += 'param names:\t' + str(self.param_names)
+        return s
