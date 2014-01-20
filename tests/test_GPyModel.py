@@ -11,7 +11,7 @@ import pymcmc
 
 if __name__ == '__main__':
     model = GPy.examples.regression.olympic_marathon_men(optimize=False, plot=False)
-    mcmc_model = pymcmc.GPyModel(model)
+    mcmc_model = pymcmc.GPyModel(model, compute_grad=True)
     print str(mcmc_model)
     print mcmc_model.log_likelihood
     print mcmc_model.log_prior
@@ -21,3 +21,9 @@ if __name__ == '__main__':
     print mcmc_model.param_names
     print mcmc_model.grad_log_likelihood
     print mcmc_model.grad_log_prior
+    proposal = pymcmc.RandomWalkProposal()
+    print str(mcmc_model)
+    new_state, log_p = proposal.propose(mcmc_model)
+    print str(mcmc_model)
+    print new_state
+    print log_p

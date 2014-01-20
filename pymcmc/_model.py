@@ -26,7 +26,6 @@ class Model(object):
         Initialize the object.
         """
         self.__name__ = name
-        self._old_state = None
 
     def __getstate__(self):
         """
@@ -107,4 +106,5 @@ class Model(object):
         s = 'Model name:\t' + self.__name__ + '\n'
         s += 'num_param:\t' + str(self.num_params) + '\n'
         s += 'param names:\t' + str(self.param_names)
+        s += str(self._state)
         return s

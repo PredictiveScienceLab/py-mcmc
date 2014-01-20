@@ -34,7 +34,7 @@ class SimpleProposal(Proposal):
         Do the actual proposal and change the state of the model to contain
         the new parameters.
         """
-        old_param = model.params
+        old_params = model.params
         (new_params,
          log_p_new_cond_old,
          log_p_old_cond_new) = self._eval_all(old_params)

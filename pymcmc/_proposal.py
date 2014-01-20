@@ -50,7 +50,7 @@ class Proposal(object):
         log_a2 = self._do_propose(model)
         new_state = model.__getstate__()
         new_log_like = model.log_likelihood
-        new_log_prior = model.log_prior()
+        new_log_prior = model.log_prior
         log_a1 = (new_log_like - old_log_like) + (new_log_prior - old_log_prior)
         model.__setstate__(old_state)
         return new_state, log_a1 + log_a2
