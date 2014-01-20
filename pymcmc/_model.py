@@ -26,6 +26,7 @@ class Model(object):
         Initialize the object.
         """
         self.__name__ = name
+        self._old_state = None
 
     def __getstate__(self):
         """
