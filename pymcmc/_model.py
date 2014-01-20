@@ -99,6 +99,20 @@ class Model(object):
         """
         raise NotImplementedError('Implement this.')
 
+    @property
+    def log_p(self):
+        """
+        Return the log probability of the model at the current parameters.
+        """
+        return self.log_likelihood + self.log_prior
+
+    @property
+    def grad_log_p(self):
+        """
+        Return the gradient of the model with respect to the current parameters.
+        """
+        return self.grad_log_likelihood + self.grad_log_prior
+
     def __str__(self):
         """
         Return a string representation of the object.

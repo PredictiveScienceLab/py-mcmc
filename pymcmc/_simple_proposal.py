@@ -18,7 +18,7 @@ class SimpleProposal(Proposal):
     """
     The base class for simple proposals (proposals based only on the current
     parameters of a model.
-    
+
     :param name:    A name for the object.
     :type name:     str
     """
@@ -33,26 +33,33 @@ class SimpleProposal(Proposal):
         """
         Do the actual proposal and change the state of the model to contain
         the new parameters.
+
+        :param model:   The model.
+        :returns:       The ratio of the forward and backward moves.
+
+        Upon return, the model shall contain the new parameters.
         """
         old_params = model.params
-        (new_params,
-         log_p_new_cond_old,
-         log_p_old_cond_new) = self._eval_all(old_params)
+        new_params = self._sample(old_params)
+        log_p_new_cond_old = self(new_params, old_params)
+        log_p_old_cond_new = self(old_params, new_params)
         model.params = new_params
         return log_p_old_cond_new - log_p_new_cond_old
 
-    def _eval_all(self, old_params):
+    def _sample(self, old_params):
         """
-        The user needs to implement this function.
+        Sample the proposal given the ``old_params``.
 
-        :param old_params:  The old parameters of the model.
-        :returns:           The tuple:
-                            (new_params, log_p_new_cond_old, log_p_old_cond_new)
-                            where:
-                            + new_params are the new parameters
-                            + log_p_new_cond_old is the probability of moving to the
-                              new parameters given the old
-                            + log_p_old_cond_new is the probability of moving to the
-                              old parameters given the new
+        :param old_params:  The old parameters of the model
+        :returns:           The new parameters of the model.
+        """
+        raise NotImplementedError('Implement this.')
+
+    def __call__(self, new_params, old_params):
+        """
+        Evaluate the proposal at the new parameters given the old parameters.
+        :param new_params:      The new parameters.
+        :param old_params:      The old parameters. We are assuming that we
+                                are conditioning on them.
         """
         raise NotImplementedError('Implement this.')
