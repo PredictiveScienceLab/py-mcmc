@@ -50,7 +50,7 @@ class SimpleProposal(Proposal):
         """
         Sample the proposal given the ``old_params``.
 
-        :param old_params:  The old parameters of the model
+        :param old_params:  The old parameters of the model.
         :returns:           The new parameters of the model.
         """
         raise NotImplementedError('Implement this.')
