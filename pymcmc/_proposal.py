@@ -18,7 +18,7 @@ class Proposal(object):
     :type name:     str
     """
 
-    def __init__(self, name='GP'):
+    def __init__(self, name='Proposal'):
         """
         Initialize the object.
         """
