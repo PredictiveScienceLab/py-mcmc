@@ -21,9 +21,8 @@ if __name__ == '__main__':
     print mcmc_model.param_names
     print mcmc_model.grad_log_likelihood
     print mcmc_model.grad_log_prior
-    proposal = pymcmc.RandomWalkProposal()
+    proposal = pymcmc.MALAProposal()
     print str(mcmc_model)
     new_state, log_p = proposal.propose(mcmc_model)
-    print str(mcmc_model)
     print new_state
     print log_p

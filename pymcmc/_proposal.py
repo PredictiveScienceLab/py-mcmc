@@ -13,7 +13,7 @@ class Proposal(object):
 
     """
     The base class of all MCMC proposals.
-    
+
     :param name:    A name for the object.
     :type name:     str
     """
@@ -29,7 +29,7 @@ class Proposal(object):
         Return a string representation of the object.
         """
         return 'Name:\t' + self.__name__
-    
+
     def propose(self, model):
         """
         Propose a move.
@@ -63,5 +63,5 @@ class Proposal(object):
 
         This needs to be reimplemented by the deriving classes.
         Here, it is assumed that the model is left to the new state.
-        """ 
+        """
         raise NotImplementedError('Implement this.')

@@ -40,7 +40,7 @@ class GradProposal(Proposal):
         """
         old_params = model.params
         old_grad_params = model.grad_log_p
-        new_params = self._sample(old_params)
+        new_params = self._sample(old_params, old_grad_params)
         log_p_new_cond_old = self(new_params, old_params, old_grad_params)
         model.params = new_params
         new_grad_params = model.grad_log_p
