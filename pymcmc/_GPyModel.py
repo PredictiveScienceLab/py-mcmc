@@ -13,7 +13,7 @@ __all__ = ['GPyModel']
 
 
 class GPyModel(Model):
-    
+
     """
     A generic wrapper for GPy model.
 
@@ -45,7 +45,7 @@ class GPyModel(Model):
             g = self.model._log_prior_gradients()
             if isinstance(g, float):
                 g = np.array([g] * self.num_params)
-                self._state['grad_log_prior'] = self.model._transform_gradients(g)
+            self._state['grad_log_prior'] = self.model._transform_gradients(g)
         self._state['params'] = self.model._get_params_transformed()
 
     def __getstate__(self):

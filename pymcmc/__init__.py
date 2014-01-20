@@ -7,7 +7,8 @@ Author:
 
 __all__ = ['Model', 'GPyModel', 'Proposal', 'SimpleProposal',
            'SymmetricProposal', 'RandomWalkProposal', 'GradProposal',
-           'MALAProposal']
+           'MALAProposal', 'MetropolisHastings',
+           'UninformativeScalePrior']
 
 
 from _model import Model
@@ -18,3 +19,5 @@ from _symmetric_proposal import SymmetricProposal
 from _random_walk_proposal import RandomWalkProposal
 from _grad_proposal import GradProposal
 from _mala_proposal import MALAProposal
+from _metropolis_hastings import MetropolisHastings
+from _priors import UninformativeScalePrior

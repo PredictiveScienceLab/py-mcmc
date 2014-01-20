@@ -34,12 +34,12 @@ class MALAProposal(GradProposal):
         super(MALAProposal, self).__init__(name=name)
 
     def _sample(self, old_params, old_grad_params):
-        return (old_params +
+        return (old_params -
                 0.5 * self.dt ** 2 * old_grad_params +
                 self.dt * np.random.randn(old_params.shape[0]))
 
     def __call__(self, new_params, old_params, old_grad_params):
         return np.sum(norm.logpdf(new_params,
-                                  old_params +
+                                  old_params -
                                   0.5 * self.dt ** 2 * old_grad_params,
                                   self.dt ** 2))

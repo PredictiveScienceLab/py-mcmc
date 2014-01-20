@@ -10,9 +10,11 @@ import pymcmc
 
 
 if __name__ == '__main__':
-    model = GPy.examples.regression.olympic_marathon_men(optimize=False, plot=False)
+    model = GPy.examples.regression.olympic_marathon_men(optimize=True, plot=False)
     mcmc_model = pymcmc.GPyModel(model, compute_grad=True)
     print str(mcmc_model)
+    print str(model)
+    quit()
     print mcmc_model.log_likelihood
     print mcmc_model.log_prior
     print mcmc_model.num_params
