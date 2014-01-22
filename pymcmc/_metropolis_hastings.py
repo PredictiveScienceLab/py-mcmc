@@ -59,7 +59,8 @@ class MetropolisHastings(object):
         """
         return self.accepted / self.count
 
-    def sample(self, num_samples, num_thin=1, num_burn=0, init_state=None):
+    def sample(self, num_samples, num_thin=1, num_burn=0,
+               init_model_state=None, init_proposal_state=None):
         """
         Take samples from the target.
 
@@ -74,8 +75,10 @@ class MetropolisHastings(object):
                                 then the initial state of the model is used.
         :type init_state:       dict
         """
-        if init_state is not None:
-            self.model.__setstate__(init_state)
+        if init_model_state is not None:
+            self.model.__setstate__(init_model_state)
+        if init_proposal_state is not None:
+            self.proposal.__setstate__(init_proposal_state)
         self.accepted = 0.
         self.count = 0.
         if self.has_db:

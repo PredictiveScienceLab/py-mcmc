@@ -13,6 +13,7 @@ import tables as pt
 import numpy as np
 import os
 from datetime import datetime
+import itertools
 from . import state_to_table_dtype, UnknownTypeException
 
 
@@ -111,3 +112,20 @@ class DataBase(object):
         row['proposal'] = self.proposal_id
         row.append()
         self.current_chain.flush()
+
+    def get_states(self, chain_num, step_num):
+        """
+        Get the model state and the proposal state from the data base.
+        """
+        model_state = {}
+        proposal_state = {}
+        chain_name = self.fd.root.mcmc.chain_counter.cols.name[chain_num]
+        chain = self.fd.get_node('/mcmc/data', chain_name)
+        step_data = chain[step_num]
+        for name, data in itertools.izip(chain.colnames, step_data):
+            model_state[name] = data
+        proposals = self.fd.get_node('/mcmc/proposals')
+        prop_data = proposals[model_state['proposal']]
+        for name, data in itertools.izip(proposals.colnames, prop_data):
+            proposal_state[name] = data
+        return model_state, proposal_state

@@ -24,6 +24,6 @@ if __name__ == '__main__':
     #print str(model)
     mcmc_model = pm.GPyModel(model, compute_grad=True)
     mcmc = pm.MetropolisHastings(mcmc_model, db_filename='test_db.h5')
-    mcmc.proposal.dt = 0.01
-    for i in xrange(10):
-        mcmc.sample(100)
+    model_state, prop_state = mcmc.db.get_states(-1, -1)
+    mcmc.sample(1000, num_thin=100, init_model_state=model_state,
+                      init_proposal_state=prop_state)
