@@ -43,3 +43,19 @@ class RandomWalkProposal(SymmetricProposal):
         new_params = np.random.multivariate_normal(old_params,
                                                    self.cov * self.scale ** 2)
         return new_params
+
+    def __getstate__(self):
+        """
+        Get the state of the object.
+        """
+        state = {}
+        state['cov'] = self.cov
+        state['scale'] = self.scale
+        return state
+
+    def __setstate__(self, state):
+        """
+        Set the state of the object.
+        """
+        self.cov = state['cov']
+        self.scale = state['scale']

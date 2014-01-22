@@ -43,3 +43,11 @@ class MALAProposal(GradProposal):
                                   old_params -
                                   0.5 * self.dt ** 2 * old_grad_params,
                                   self.dt ** 2))
+
+    def __getstate__(self):
+        state = {}
+        state['dt'] = self.dt
+        return state
+
+    def __setstate__(self, state):
+        self.dt = state['dt']

@@ -30,6 +30,18 @@ class Proposal(object):
         """
         return 'Name:\t' + self.__name__
 
+    def __getstate__(self):
+        """
+        Get the state of the object.
+        """
+        return {}
+
+    def __setstate__(self, state):
+        """
+        Set the state of the object.
+        """
+        pass
+
     def propose(self, model):
         """
         Propose a move.
