@@ -1,1 +1,18 @@
 A python module implementing some generic MCMC routines.
+
+The main purpose of this module is to serve as a simple MCMC framework for
+Gaussian Process models developed in the GPy package.
+
+Features:
+    + Random walk proposals.
+    + Metropolis Adjusted Langevin Dynamics (use the MALAProposal).
+    + The MCMC chains are stored in fast HDF5 format using PyTables.
+
+I have deliberately not adding any tuning capabilities in this library. This is
+because tuning will be done (in the near future) using the Sequential Monte
+Carlo (SMC) component.
+
+Ilias Bilionis,
+January, 2014
+Mathematics and Computer Science Division,
+Argonne National Laboratory
