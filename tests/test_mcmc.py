@@ -23,11 +23,7 @@ if __name__ == '__main__':
     #model.optimize()
     #print str(model)
     mcmc_model = pm.GPyModel(model, compute_grad=True)
-    mcmc = pm.MetropolisHastings(mcmc_model)
+    mcmc = pm.MetropolisHastings(mcmc_model, db_filename='test_db.h5')
     mcmc.proposal.dt = 0.01
-    log_p, states = mcmc.sample(10000)
-    #plt.plot(log_p)
-    #plt.show()
-    plt.plot(np.exp(states[:, 2]))
-    plt.show()
-    a = raw_input('Press enter to continue...')
+    for i in xrange(10):
+        mcmc.sample(100)
