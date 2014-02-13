@@ -60,7 +60,8 @@ class MetropolisHastings(object):
         return self.accepted / self.count
 
     def sample(self, num_samples, num_thin=1, num_burn=0,
-               init_model_state=None, init_proposal_state=None):
+               init_model_state=None, init_proposal_state=None,
+               verbose=False):
         """
         Take samples from the target.
 
@@ -95,4 +96,5 @@ class MetropolisHastings(object):
                 if self.has_db:
                     self.db.add_chain_record(i + 1, self.accepted,
                                              self.model.__getstate__())
-                print i + 1, self.model.log_p, self.acceptance_rate
+                if verbose:
+                    print i + 1, self.model.log_p, self.acceptance_rate
