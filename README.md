@@ -55,7 +55,8 @@ the MCMC part of this code will become obsolete.
 
 Demos
 -----
-I provide various demos demonstrating how the code can be used.
+I provide various demos demonstrating how the code can be used:
++ [demos/demo1.py](demos/demo1.py): Demonstrates how to train GPy model using MCMC.
 
 
 Notes
