@@ -20,6 +20,13 @@ The code features the following things at the moment:
 [GPy package](http://sheffieldml.github.io/GPy/).
 
 
+Installation
+------------
+Clone the package, get into its directory and do a:
+```
+python setup.py install
+```
+
 Related Packages
 ----------------
 Probably, the most related package to what I am offering is the excellent
@@ -44,6 +51,11 @@ available.
 Therefore, the purpose of this package is to fill the gap between PyMC 2.3
 and PyMC 3. When the programers of PyMC 3 fix the afforementioned problem, then
 the MCMC part of this code will become obsolete.
+
+
+Demos
+-----
+I provide various demos demonstrating how the code can be used.
 
 
 Notes
