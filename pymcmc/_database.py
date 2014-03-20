@@ -52,9 +52,9 @@ class DataBase(object):
             self.fd = pt.open_file(filename, mode='w')
             self.fd.create_group('/', 'mcmc',
                                  'Metropolis-Hastings Algorithm Data')
-            self.proposals = self.fd.create_table('/mcmc', 'proposals',
-                                                  self.ProposalRecordDType,
-                                                  'MCMC Proposals')
+            self.fd.create_table('/mcmc', 'proposals',
+                                 self.ProposalRecordDType,
+                                 'MCMC Proposals')
             self.fd.create_table('/mcmc', 'chain_counter',
                                  self.ChainCounterDType, 'Chain Counter')
             self.fd.create_group('/mcmc', 'data', 'Collection of Chains')

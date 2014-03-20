@@ -7,6 +7,7 @@ Author:
 
 
 from _model import Model
+from _kern import *
 from _GPyModel import GPyModel
 from _proposal import Proposal
 from _simple_proposal import SimpleProposal
