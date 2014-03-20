@@ -23,7 +23,7 @@ class GPyModel(Model):
     :type name:     str
     """
 
-    def __init__(self, model, name='GPy model wrapper', compute_grad=False):
+    def __init__(self, model, name='GPy model wrapper', compute_grad=True):
         """
         Initialize the object.
         """

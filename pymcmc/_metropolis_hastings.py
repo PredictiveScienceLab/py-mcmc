@@ -10,11 +10,15 @@ __all__ = ['MetropolisHastings']
 
 
 from . import Model
+from . import GPyModel
 from . import Proposal
+from . import RandomWalkProposal
 from . import MALAProposal
 from . import DataBase
+import GPy
 import numpy as np
 import math
+import sys
 
 
 class MetropolisHastings(object):
@@ -31,13 +35,22 @@ class MetropolisHastings(object):
     :type db_filename:  str
     """
 
-    def __init__(self, model, proposal=MALAProposal(),
+    def __init__(self, model, proposal=None,
                  db_filename=None):
         """
         Initialize the object.
         """
-        assert isinstance(model, Model)
+        if isinstance(model, GPy.core.Model):
+            model = GPyModel(model)
+        else:
+            assert isinstance(model, Model)
         self.model = model
+        if proposal is None:
+            try:
+                y = model.grad_log_p
+                proposal = MALAProposal()
+            except:
+                proposal = RandomWalkProposal()
         assert isinstance(proposal, Proposal)
         self.proposal = proposal
         self.db_filename = db_filename
@@ -97,4 +110,11 @@ class MetropolisHastings(object):
                     self.db.add_chain_record(i + 1, self.accepted,
                                              self.model.__getstate__())
                 if verbose:
-                    print i + 1, self.model.log_p, self.acceptance_rate
+                    sys.stdout.write('sample ' + str(i + 1).zfill(len(str(num_samples)))
+                                     + ' of ' + str(num_samples)
+                                     + ', log_p: %.6f, acc. rate: %1.2f'
+                                       % (self.model.log_p, self.acceptance_rate)
+                                     + '\r')
+                    sys.stdout.flush()
+        if verbose:
+            sys.stdout.write('\n')
