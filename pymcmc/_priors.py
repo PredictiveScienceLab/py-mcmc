@@ -47,6 +47,12 @@ class UninformativeScalePrior(Prior):
         """
         return -1. / x
 
+    def __str__(self):
+        """
+        Return a string representation of the object.
+        """
+        return 'Uninformative Scale Prior: p(x) = 1/x, x > 0'
+
 
 class UninformativePrior(Prior):
 
@@ -98,3 +104,29 @@ class UninformativePrior(Prior):
         :returns:   The gradient of the logarithm of the probability.
         """
         return 0.
+
+    def __str__(self):
+        """
+        Return a string representation of the object.
+        """
+        if (self.domain == domains.REAL or
+            self.upper == np.inf or
+            self.lower == -np.inf):
+            return 'Uninformative Prior: p(x) = 1'
+        else:
+            return 'Uninformative Prior: p(x) = |D|*I_D(x)'
+
+    def rvs(self, n):
+        """
+        Draw random samples from the probability density.
+
+        It works only for BOUNDED domains.
+
+        :param n:   The number of samples to draw.
+        :type n:    int
+        """
+        if self.upper < np.inf and self.lower > -np.inf:
+            return np.random.rand(n) * (self.upper - self.lower) + self.lower
+        else:
+            raise RuntimeError('Cannot draw samples from an improper '
+                               ' probability distribution.')

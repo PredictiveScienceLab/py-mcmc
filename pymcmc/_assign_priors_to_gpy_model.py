@@ -23,6 +23,8 @@ def assign_priors_to_gpy_model(model):
     """
     Automatically assign uninformative priors to a GPYModel.
 
+    It only assigns priors to variables that do not have one already.
+
     The assignmnent of priors is done as follows:
     + If a parameter is constrained to be POSITIVE, then it is assigned a
       :class:`pymcmc.UninformativeScalePrior`.
@@ -36,6 +38,8 @@ def assign_priors_to_gpy_model(model):
     """
     assert isinstance(model, GPy.core.Model)
     param_names = model._get_param_names()
+    if model.priors is None:
+        model.priors = [None] * len(param_names)
     # Loop over the constrains
     for idx, c in itertools.izip(model.constrained_indices, model.constraints):
         # Find the prior corresponding to constrain c
@@ -50,11 +54,13 @@ def assign_priors_to_gpy_model(model):
             prior = UninformativePrior(lower=c.lower, upper=c.upper)
             # START OF FIX FOR GPY BUG:
             for i in idx:
-                model.priors[i] = prior
+                if model.priors[i] is None:
+                    model.priors[i] = prior
             continue
             # END OF FIX FOR GPY BUG
         for i in idx:
-            model.set_prior(param_names[i], prior)
+            if model.priors[i] is None:
+                model.set_prior(param_names[i], prior)
     # Any unconstrained indices should receive an unbounded UninformativePrior
     unbounded_uninformative_prior = UninformativePrior()
     for i in range(len(param_names)):
