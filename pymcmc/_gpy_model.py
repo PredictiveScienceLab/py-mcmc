@@ -6,6 +6,7 @@ Author:
 """
 
 from . import Model
+from . import assign_priors_to_gpy_model
 import numpy as np
 
 
@@ -17,16 +18,24 @@ class GPyModel(Model):
     """
     A generic wrapper for GPy model.
 
-    :param model:   A GPy model.
-    :type model:    GPy.Model
-    :param name:    A name for the model.
-    :type name:     str
+    :param model:       A GPy model.
+    :type model:        :class:`GPy.core.Model`
+    :param name:        A name for the model.
+    :type name:         str
+    :param compute_grad:    Compute gradients of the log probability or not.
+    :type compute_grad:     bool
+    :param assign_priors:   If ``True`` then uninformative priors are assigned
+                            to the underlying GPyModel.
+    :type assign_priors:    bool
     """
 
-    def __init__(self, model, name='GPy model wrapper', compute_grad=True):
+    def __init__(self, model, name='GPy model wrapper', compute_grad=True,
+                 assign_priors=True):
         """
         Initialize the object.
         """
+        if assign_priors:
+            assign_priors_to_gpy_model(model)
         self.model = model
         super(GPyModel, self).__init__(name=name)
         self._compute_grad = compute_grad
