@@ -1,5 +1,5 @@
 """
-GPy Regression with pymcmc.
+This demo demonstrates how to train a GPy model using the pymcmc module.
 
 Author:
     Ilias Bilionis
