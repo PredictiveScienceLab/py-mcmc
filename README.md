@@ -57,6 +57,11 @@ Demos
 -----
 I provide various demos demonstrating how the code can be used:
 + [demos/demo1.py](demos/demo1.py): Demonstrates how to train GPy model using MCMC.
++ [demos/demo2.py](demos/demo2.py): Demonstrates how a GP with a mean can be trained.
+  This model is equivalent to Bayesian linear regression.
++ [demos/demo3.py](demos/demo3.py): Demonstrates how a GP with a mean using
+  automatic relevance determination for the basis functions can be used. This is
+  equivalent to a Relevance Vector Machine model.
 
 
 Notes

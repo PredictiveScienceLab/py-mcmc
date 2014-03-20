@@ -35,10 +35,15 @@ class MeanFunctionKernpart(Kernpart):
     :param variance:    The strength of the kernel. The smaller it is, the
                         less important its contribution.
     :type variance:     float
-    :param weights:     The weight of each basis function. The closer it is to
+    :param kappa:       The weight of each basis function. The closer it is to
                         zero, the less important the corresponding basis
                         function.
-    :type weights:      :class:`numpy.ndarray`
+    :type kappa:        :class:`numpy.ndarray`
+    :param ARD:         If ``ARD`` is ``True``, then the mean function behaves
+                        like a Relevance Vector Machine (RVM). If it is
+                        ``False`` then it is equivalent to a common mean
+                        function.
+    :type ARD:          bool
     """
 
     # The basis functions
@@ -47,8 +52,14 @@ class MeanFunctionKernpart(Kernpart):
     # The variance of the kernel
     _variance = None
 
-    # The weights of the kernel
-    _weights = None
+    # The kappa of the kernel
+    _kappa = None
+
+    # Automatic Relevance Determination
+    _ARD = None
+
+    # The number of parameters of the kernel
+    _num_params = None
 
     @property
     def basis(self):
@@ -69,7 +80,14 @@ class MeanFunctionKernpart(Kernpart):
         """
         Get the number of parameters of the object.
         """
-        return self.num_basis + 1
+        return self._num_params
+
+    @property
+    def ARD(self):
+        """
+        Get the ARD flag.
+        """
+        return self._ARD
 
     @property
     def variance(self):
@@ -79,17 +97,19 @@ class MeanFunctionKernpart(Kernpart):
         return self._variance
 
     @property
-    def weights(self):
+    def kappa(self):
         """
-        Get the weights of the kernel.
+        Get the kappa of the kernel.
         """
-        return self._weights
+        return self._kappa
 
-    def __init__(self, input_dim, basis, variance=1., weights=None):
+    def __init__(self, input_dim, basis, variance=1., kappa=None, ARD=False,
+                 parametrize_variance=False):
         """
         Initialize the object.
         """
         self.input_dim = int(input_dim)
+        self._ARD = ARD
         if not hasattr(basis, '__call__'):
             raise TypeError('The basis functions must implement the '
                             '\'__call__()\' method. This method should '
@@ -101,42 +121,64 @@ class MeanFunctionKernpart(Kernpart):
                             ' \'num_output\' which should store the number of'
                             ' basis functions it contains.')
         self._basis = basis
-        if weights is not None:
-            assert weights.shape == (self.num_basis, )
+        if kappa is not None:
+            assert kappa.shape == (self.num_basis, )
         else:
-            weights = np.ones(self.num_basis)
+            kappa = np.ones(self.num_basis)
+        self._variance = variance
+        self._kappa = kappa
         self.name = 'mean_function'
-        self._set_params(np.hstack([variance, weights]))
+        self.parametrize_variance = parametrize_variance
+        num_params = 0
+        params = []
+        if self.parametrize_variance:
+            num_params += 1
+            params.append(variance)
+        if self.ARD:
+            num_params += self.num_basis
+            params.append(kappa)
+        self._num_params = num_params
+        self._set_params(np.hstack(params))
 
     def _get_params(self):
         """
         Get an array containing the parameters of the kernel.
 
         :returns:   An 1D numpy array containing the parameters (variance,
-                    weights).
+                    kappa).
         """
-        return np.hstack([self.variance, self.weights])
+        params = []
+        if self.parametrize_variance:
+            params.append(self.variance)
+        if self.ARD:
+            params.append(self.kappa)
+        return np.hstack(params)
 
     def _set_params(self, x):
         """
         Set the parameters from a 1D numpy array ``x``. The first element
         should be the variance and the rest elements should correspond to the
-        weights of the kernel.
+        kappa of the kernel.
         """
         assert x.size == self.num_params, 'Illegal number of parameters.'
-        self._variance = x[0]
-        self._weights = x[1:]
+        i = 0
+        if self.parametrize_variance:
+            self._variance = x[0]
+            i = 1
+        if self.ARD:
+            self._kappa = x[i:]
 
     def _get_param_names(self):
         """
         Get a list containing the names of the parameters in the order they
         appear when you call :meth:`MeanFunctionKernel._get_params()`.
         """
-        if self.num_params == 2:
-            return ['variance', 'weight']
-        else:
-            return (['variance'] +
-                    ['weights_%d' % i for i in range(self.num_basis)])
+        names = []
+        if self.parametrize_variance:
+            names.append('variance')
+        if self.ARD:
+            names += ['kappa_%d' % i for i in range(self.num_basis)]
+        return names
 
     def K(self, X, X2, target):
         """
@@ -149,7 +191,7 @@ class MeanFunctionKernpart(Kernpart):
         phi_X = self.basis(X)
         phi_X2 = phi_X if X2 is None or X2 is X else self.basis(X2)
         target += (self.variance *
-                   np.einsum('ij,j,kj', phi_X, self.weights, phi_X2))
+                   np.einsum('ij,j,kj', phi_X, self.kappa, phi_X2))
 
     def Kdiag(self, X, target):
         """
@@ -158,7 +200,7 @@ class MeanFunctionKernpart(Kernpart):
         """
         phi_X = self.basis(X)
         target += (self.variance *
-                   np.einsum('ij,j,ij->i', phi_X, self.weights, phi_X))
+                   np.einsum('ij,j,ij->i', phi_X, self.kappa, phi_X))
 
     def dK_dtheta(self, dL_dK, X, X2, target):
         """
@@ -174,12 +216,16 @@ class MeanFunctionKernpart(Kernpart):
         """
         phi_X = self.basis(X)
         phi_X2 = phi_X if X2 is None or X2 is X else self.basis(X2)
-        target[0] += np.einsum('ij,ik,k,jk', dL_dK, phi_X, self.weights, phi_X2)
-        target[1] += (self.variance *
-                      np.einsum('ij,ik,jk->k', dL_dK, phi_X, phi_X2))
+        i = 0
+        if self.parametrize_variance:
+            target[0] += np.einsum('ij,ik,k,jk', dL_dK, phi_X, self.kappa, phi_X2)
+            i = 1
+        if self.ARD:
+            target[i:] += (self.variance *
+                          np.einsum('ij,ik,jk->k', dL_dK, phi_X, phi_X2))
 
 
-def mean_function(input_dim, basis, variance=1., weights=None):
+def mean_function(input_dim, basis, variance=1., kappa=None, ARD=False):
     """
     Construct a kernel representing a mean function.
 
@@ -195,11 +241,16 @@ def mean_function(input_dim, basis, variance=1., weights=None):
     :param variance:    The strength of the kernel. The smaller it is, the
                         less important its contribution.
     :type variance:     float
-    :param weights:     The weight of each basis function. The closer it is to
+    :param kappa:     The weight of each basis function. The closer it is to
                         zero, the less important the corresponding basis
                         function.
-    :type weights:      :class:`numpy.ndarray`
+    :type kappa:      :class:`numpy.ndarray`
+    :param ARD:         If ``ARD`` is ``True``, then the mean function behaves
+                        like a Relevance Vector Machine (RVM). If it is
+                        ``False`` then it is equivalent to a common mean
+                        function.
+    :type ARD:          bool
     """
     part = MeanFunctionKernpart(input_dim, basis, variance=variance,
-                                weights=weights)
+                                kappa=kappa, ARD=ARD)
     return kern(input_dim, [part])
