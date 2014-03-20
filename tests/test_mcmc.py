@@ -19,11 +19,12 @@ if __name__ == '__main__':
     model.set_prior('rbf_variance', variance_prior)
     model.set_prior('noise_variance', noise_prior)
     model.set_prior('rbf_lengthscale', length_scale_prior)
-    print str(model)
-    #model.optimize()
     #print str(model)
+    #model.optimize()
+    print str(model)
     mcmc_model = pm.GPyModel(model, compute_grad=True)
     mcmc = pm.MetropolisHastings(mcmc_model, db_filename='test_db.h5')
-    model_state, prop_state = mcmc.db.get_states(-1, -1)
-    mcmc.sample(1000, num_thin=100, init_model_state=model_state,
-                      init_proposal_state=prop_state)
+    mcmc.sample(1000)
+#    model_state, prop_state = mcmc.db.get_states(-1, -1)
+#    mcmc.sample(1000, num_thin=100, init_model_state=model_state,
+#                      init_proposal_state=prop_state)
