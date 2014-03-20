@@ -138,7 +138,8 @@ class MeanFunctionKernpart(Kernpart):
             num_params += self.num_basis
             params.append(kappa)
         self._num_params = num_params
-        self._set_params(np.hstack(params))
+        if not len(params) == 0:
+            self._set_params(np.hstack(params))
 
     def _get_params(self):
         """
@@ -147,6 +148,8 @@ class MeanFunctionKernpart(Kernpart):
         :returns:   An 1D numpy array containing the parameters (variance,
                     kappa).
         """
+        if self.num_params == 0:
+            return []
         params = []
         if self.parametrize_variance:
             params.append(self.variance)
@@ -225,7 +228,8 @@ class MeanFunctionKernpart(Kernpart):
                           np.einsum('ij,ik,jk->k', dL_dK, phi_X, phi_X2))
 
 
-def mean_function(input_dim, basis, variance=1., kappa=None, ARD=False):
+def mean_function(input_dim, basis, variance=1., kappa=None, ARD=False,
+                  parametrize_variance=False):
     """
     Construct a kernel representing a mean function.
 
@@ -252,5 +256,6 @@ def mean_function(input_dim, basis, variance=1., kappa=None, ARD=False):
     :type ARD:          bool
     """
     part = MeanFunctionKernpart(input_dim, basis, variance=variance,
-                                kappa=kappa, ARD=ARD)
+                                kappa=kappa, ARD=ARD,
+                                parametrize_variance=parametrize_variance)
     return kern(input_dim, [part])

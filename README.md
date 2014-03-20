@@ -1,5 +1,5 @@
-A python module implementing some generic MCMC routines.
-========================================================
+A python module implementing some generic MCMC routines
+=======================================================
 
 The main purpose of this module is to serve as a simple MCMC framework for
 generic models. Probably the most useful contribution at the moment, is that
@@ -53,6 +53,18 @@ and PyMC 3. When the programers of PyMC 3 fix the afforementioned problem, then
 the MCMC part of this code will become obsolete.
 
 
+Additional Useful Packages
+--------------------------
+I have written some other packages that are useful in combination with py-mcmc:
++ [Py-ORTHPOL](https://github.com/ebilionis/py-orthpol): Construct orthogonal
+  polynomials with respect to arbitrary weight functions. These can be useful
+  as mean functions for the Gaussian processes discussed here. They can be used
+  directly.
++ [Py-Design](https://github.com/ebilionis/py-design): Design of experiments for
+  Python. This is extremely useful if you are trying to learn the output of a
+  computer code and you want to a good design of points to evaluate it.
+
+
 Demos
 -----
 I provide various demos demonstrating how the code can be used:
@@ -62,6 +74,8 @@ I provide various demos demonstrating how the code can be used:
 + [demos/demo3.py](demos/demo3.py): Demonstrates how a GP with a mean using
   automatic relevance determination for the basis functions can be used. This is
   equivalent to a Relevance Vector Machine model.
++ [demos/demo4.py](demos/demo4.py): Demonstrates how a GP with a mean can be
+  combined with a normal covariance kernel.
 
 
 Notes
