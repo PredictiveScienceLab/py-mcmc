@@ -80,7 +80,7 @@ I provide various demos demonstrating how the code can be used:
 
 Notes
 -----
-I have deliberately not adding any tuning capabilities in this library. This is
+I have deliberately not added any tuning capabilities in this library. This is
 because tuning will be done (in the near future) using the Sequential Monte
 Carlo (SMC) component.
 
