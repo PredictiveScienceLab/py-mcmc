@@ -14,6 +14,8 @@ from _gpy_model import *
 from _proposal import *
 from _simple_proposal import *
 from _symmetric_proposal import *
+from _tunable_proposal_concept import *
+from _single_parameter_tunable_proposal_concept import *
 from _random_walk_proposal import *
 from _grad_proposal import *
 from _mala_proposal import *

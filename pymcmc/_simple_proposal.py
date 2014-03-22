@@ -19,15 +19,13 @@ class SimpleProposal(Proposal):
     The base class for simple proposals (proposals based only on the current
     parameters of a model.
 
-    :param name:    A name for the object.
-    :type name:     str
     """
 
-    def __init__(self, name='Simple Proposal'):
+    def __init__(self, **kwargs):
         """
         Initialize the object.
         """
-        super(SimpleProposal, self).__init__(name=name)
+        super(SimpleProposal, self).__init__(**kwargs)
 
     def _do_propose(self, model):
         """

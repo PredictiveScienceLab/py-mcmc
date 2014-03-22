@@ -17,15 +17,13 @@ class SymmetricProposal(SimpleProposal):
     """
     The base class for all symmetric proposals.
 
-    :param name:    A name for the object.
-    :type name:     str
     """
 
-    def __init__(self, name='Symmetric Proposal'):
+    def __init__(self, **kwargs):
         """
         Initialize the object.
         """
-        super(SymmetricProposal, self).__init__(name=name)
+        super(SymmetricProposal, self).__init__(**kwargs)
 
     def __call__(self, new_params, old_params):
         """

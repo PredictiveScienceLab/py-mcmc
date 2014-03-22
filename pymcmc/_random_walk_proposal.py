@@ -11,9 +11,10 @@ __all__ = ['RandomWalkProposal']
 
 import numpy as np
 from . import SymmetricProposal
+from . import SingleParameterTunableProposalConcept
 
 
-class RandomWalkProposal(SymmetricProposal):
+class RandomWalkProposal(SymmetricProposal, SingleParameterTunableProposalConcept):
 
     """
     A random walk proposal.
@@ -27,7 +28,7 @@ class RandomWalkProposal(SymmetricProposal):
     :type scale:    float
     """
 
-    def __init__(self, cov=None, scale=1., name='Simple Proposal'):
+    def __init__(self, cov=None, scale=1., **kwargs):
         """
         Initialize the object.
         """
@@ -35,7 +36,11 @@ class RandomWalkProposal(SymmetricProposal):
             cov = 1.
         self.cov = cov
         self.scale = scale
-        super(RandomWalkProposal, self).__init__(name=name)
+        if not kwargs.has_key('name'):
+            kwargs['name'] = 'Random Walk Proposal'
+        kwargs['param_name'] = 'scale'
+        SymmetricProposal.__init__(self, **kwargs)
+        SingleParameterTunableProposalConcept.__init__(self, **kwargs)
 
     def _sample(self, old_params):
         if isinstance(self.cov, float):
@@ -48,14 +53,17 @@ class RandomWalkProposal(SymmetricProposal):
         """
         Get the state of the object.
         """
-        state = {}
+        state = SymmetricProposal.__getstate__(self)
         state['cov'] = self.cov
         state['scale'] = self.scale
-        return state
+        tuner_state = SingleParameterTunableProposalConcept.__getstate__()
+        return dict(state.items() + tuner_state.items())
 
     def __setstate__(self, state):
         """
         Set the state of the object.
         """
+        SymmetricProposal.__setstate__(self, state)
         self.cov = state['cov']
         self.scale = state['scale']
+        SingleParameterTunableProposalConcept.__setstate__(state)

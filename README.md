@@ -78,12 +78,6 @@ I provide various demos demonstrating how the code can be used:
   combined with a normal covariance kernel.
 
 
-Notes
------
-I have deliberately not adding any tuning capabilities in this library. This is
-because tuning will be done (in the near future) using the Sequential Monte
-Carlo (SMC) component.
-
 Ilias Bilionis,
 January, 2014
 Mathematics and Computer Science Division,

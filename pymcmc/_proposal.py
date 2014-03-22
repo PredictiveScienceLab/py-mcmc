@@ -16,13 +16,16 @@ class Proposal(object):
 
     :param name:    A name for the object.
     :type name:     str
+
+    .. note::
+        It ignores all other keyword arguments.
     """
 
-    def __init__(self, name='Proposal'):
+    def __init__(self, **kwargs):
         """
         Initialize the object.
         """
-        self.__name__ = name
+        self.__name__ = kwargs['name'] if kwargs.has_key('name') else 'Proposal'
 
     def __str__(self):
         """
@@ -34,13 +37,15 @@ class Proposal(object):
         """
         Get the state of the object.
         """
-        return {}
+        state = {}
+        state['name'] = self.__name__
+        return state
 
     def __setstate__(self, state):
         """
         Set the state of the object.
         """
-        pass
+        self.__name__ = state['name']
 
     def propose(self, model):
         """

@@ -18,15 +18,16 @@ class GradProposal(Proposal):
     The base class for proposals that depend on the gradient of the target
     probability distribution with respect to the parameters.
 
-    :param name:    A name for the object.
-    :type name:     str
+    The keyword arguments are the same as in :class:`pymcmc.Proposal`.
     """
 
-    def __init__(self, name='Grad Proposal'):
+    def __init__(self, **kwargs):
         """
         Initialize the object.
         """
-        super(GradProposal, self).__init__(name=name)
+        if not kwargs.has_key('name'):
+            kwargs['name'] = 'Grad Proposal'
+        super(GradProposal, self).__init__(**kwargs)
 
     def _do_propose(self, model):
         """

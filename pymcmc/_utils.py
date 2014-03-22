@@ -47,7 +47,7 @@ def state_to_table_dtype(state,
         elif isinstance(state[name], np.ndarray):
             dtype = pt.Float64Col(shape=state[name].shape)
         else:
-            raise UnknwonTypeException('I cannot deal with the type of %s (%s)'
+            raise UnknownTypeException('I cannot deal with the type of %s (%s)'
                                        %(name, type(state[name])))
         dtype_dict[name] = dtype
     return dtype_dict

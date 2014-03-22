@@ -22,7 +22,7 @@ model = GPy.examples.regression.olympic_marathon_men(optimize=False, plot=False)
 print 'Model before training:'
 print str(model)
 # Pick a proposal for MCMC (here we pick a Metropolized Langevin Proposal
-proposal = pm.MALAProposal(dt=1e-1)
+proposal = pm.MALAProposal(dt=1.)
 # Construct a Metropolis Hastings object
 mcmc = pm.MetropolisHastings(model,                     # The model you want to train
                              proposal=proposal,         # The proposal you want to use

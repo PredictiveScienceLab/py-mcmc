@@ -14,7 +14,8 @@ import numpy as np
 import os
 from datetime import datetime
 import itertools
-from . import state_to_table_dtype, UnknownTypeException
+from . import state_to_table_dtype
+from . import UnknownTypeException
 
 
 class DataBase(object):

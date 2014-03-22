@@ -102,7 +102,7 @@ plt.show()
 a = raw_input('press enter to continue...')
 # Or you might want to do it using MCMC:
 new_model = GPy.models.GPRegression(X, Y, kernel=mean)
-proposal = pm.MALAProposal(dt=0.1)
+proposal = pm.MALAProposal(dt=1.)
 mcmc = pm.MetropolisHastings(new_model, proposal=proposal)
 mcmc.sample(10000, num_thin=100, num_burn=1000, verbose=True)
 print 'Model trained with MCMC:'
