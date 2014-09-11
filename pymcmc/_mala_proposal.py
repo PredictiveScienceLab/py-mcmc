@@ -48,9 +48,8 @@ class MALAProposal(GradProposal, SingleParameterTunableProposalConcept):
 
     def __call__(self, new_params, old_params, old_grad_params):
         return np.sum(norm.logpdf(new_params,
-                                  old_params +
-                                  0.5 * self.dt ** 2 * old_grad_params,
-                                  self.dt ** 2))
+                                  loc=(old_params + 0.5 * self.dt ** 2 * old_grad_params),
+                                  scale=self.dt))
 
     def __getstate__(self):
         state = GradProposal.__getstate__(self)
