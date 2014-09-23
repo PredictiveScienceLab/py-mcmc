@@ -9,6 +9,9 @@ Author:
 __all__ = ['Proposal']
 
 
+import copy
+
+
 class Proposal(object):
 
     """
@@ -61,11 +64,11 @@ class Proposal(object):
         The model shall remain the same after a call to this method. That is,
         no matter what happens to it, its parameters should remain the same.
         """
-        old_state = model.__getstate__()
+        old_state = copy.deepcopy(model.__getstate__())
         old_log_like = model.log_likelihood
         old_log_prior = model.log_prior
         log_a2 = self._do_propose(model)
-        new_state = model.__getstate__()
+        new_state = copy.deepcopy(model.__getstate__())
         new_log_like = model.log_likelihood
         new_log_prior = model.log_prior
         log_a1 = (new_log_like - old_log_like) + (new_log_prior - old_log_prior)
