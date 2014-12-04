@@ -58,7 +58,7 @@ class PolynomialBasis(object):
 
 
 # Pick your degree
-degree = 4
+degree = 10
 # Construct your basis
 poly_basis = PolynomialBasis(degree)
 # Let us generate some random data to play with
@@ -74,13 +74,14 @@ X = np.random.rand(num_points, 1)
 # our basis functions and add some noise
 # The weights of the basis functions:
 weights = np.random.randn(poly_basis.num_output)
+weights[2] = 0.
 # The observations we make
 Y = np.dot(poly_basis(X), weights) + noise * np.random.randn(num_points)
 # The output need also be a 2D numpy array
 Y = Y[:, None]
 # Let's construct a GP model with just a mean and a diagonal covariance
 # This is the mean (and at the same time the kernel)
-mean = pm.mean_function(input_dim, poly_basis)
+mean = pm.MeanFunction(input_dim, poly_basis, ARD=True)
 # Now, let's construct the model
 model = GPy.models.GPRegression(X, Y, kernel=mean)
 print 'Model before training:'
@@ -104,7 +105,7 @@ a = raw_input('press enter to continue...')
 new_model = GPy.models.GPRegression(X, Y, kernel=mean)
 proposal = pm.MALAProposal(dt=1.)
 mcmc = pm.MetropolisHastings(new_model, proposal=proposal)
-mcmc.sample(10000, num_thin=100, num_burn=1000, verbose=True)
+mcmc.sample(30000, num_thin=100, num_burn=1000, verbose=True)
 print 'Model trained with MCMC:'
 print str(new_model)
 # Plot everything for this too:
@@ -113,7 +114,7 @@ new_model.plot(plot_limits=(0, 1))
 x = np.linspace(0, 1, 50)[:, None]
 y = np.dot(poly_basis(x), weights)
 plt.plot(x, y, 'r', linewidth=2)
-plt.legend(['Mean of GP', '5\% percentile of GP', '95\% percentile of GP',
+plt.legend(['Mean of GP', '5% percentile of GP', '95% percentile of GP',
             'Observations', 'Real Underlying Function'], loc='best')
 plt.title('Model trained by MCMC')
 plt.show()

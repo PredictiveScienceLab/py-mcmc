@@ -10,14 +10,17 @@ Date:
 """
 
 
-__all__ = ['MeanFunctionKernpart', 'mean_function']
+__all__ = ['MeanFunction']
 
 
 from GPy.kern import Kern
+from GPy.core.parameterization import Param
+from GPy.core.parameterization.transformations import Logexp
+from GPy.util.caching import Cache_this
 import numpy as np
 
 
-class MeanFunctionKernpart(Kern):
+class MeanFunction(Kern):
 
     """
     A kernel representing a mean function.
@@ -88,25 +91,13 @@ class MeanFunctionKernpart(Kern):
         """
         return self._ARD
 
-    @property
-    def variance(self):
-        """
-        Get the variance of the kernel.
-        """
-        return self._variance
-
-    @property
-    def kappa(self):
-        """
-        Get the kappa of the kernel.
-        """
-        return self._kappa
-
-    def __init__(self, input_dim, basis, variance=1., kappa=None, ARD=False,
-                 parametrize_variance=False):
+    def __init__(self, input_dim, basis, variance=None, ARD=False,
+                 active_dims=None, name='Mean', useGP=False):
         """
         Initialize the object.
         """
+        super(MeanFunction, self).__init__(input_dim, active_dims, name,
+                                           useGP=useGP)
         self.input_dim = int(input_dim)
         self._ARD = ARD
         if not hasattr(basis, '__call__'):
@@ -120,69 +111,26 @@ class MeanFunctionKernpart(Kern):
                             ' \'num_output\' which should store the number of'
                             ' basis functions it contains.')
         self._basis = basis
-        if kappa is not None:
-            assert kappa.shape == (self.num_basis, )
+        self._num_params = basis.num_output
+        if not ARD:
+            if variance is None:
+                variance = np.ones(1)
+            else:
+                variance = np.asarray(variance)
+                assert variance.size == 1, 'Only 1 variance needed for a non-ARD kernel'
         else:
-            kappa = np.ones(self.num_basis)
-        self._variance = variance
-        self._kappa = kappa
-        self.name = 'mean_function'
-        self.parametrize_variance = parametrize_variance
-        num_params = 0
-        params = []
-        if self.parametrize_variance:
-            num_params += 1
-            params.append(variance)
-        if self.ARD:
-            num_params += self.num_basis
-            params.append(kappa)
-        self._num_params = num_params
-        if not len(params) == 0:
-            self._set_params(np.hstack(params))
+            if variance is not None:
+                variance = np.asarray(variance)
+                assert variance.size in [1, self.num_params], 'Bad number of variances'
+                if variance.size != self.num_params:
+                    variance = np.ones(self.num_params) * variance
+            else:
+                variance = np.ones(self.num_params)
+        self.variance = Param('variance', variance, Logexp())
+        self.link_parameters(self.variance)
 
-    def _get_params(self):
-        """
-        Get an array containing the parameters of the kernel.
-
-        :returns:   An 1D numpy array containing the parameters (variance,
-                    kappa).
-        """
-        if self.num_params == 0:
-            return []
-        params = []
-        if self.parametrize_variance:
-            params.append(self.variance)
-        if self.ARD:
-            params.append(self.kappa)
-        return np.hstack(params)
-
-    def _set_params(self, x):
-        """
-        Set the parameters from a 1D numpy array ``x``. The first element
-        should be the variance and the rest elements should correspond to the
-        kappa of the kernel.
-        """
-        assert x.size == self.num_params, 'Illegal number of parameters.'
-        i = 0
-        if self.parametrize_variance:
-            self._variance = x[0]
-            i = 1
-        if self.ARD:
-            self._kappa = x[i:]
-
-    def _get_param_names(self):
-        """
-        Get a list containing the names of the parameters in the order they
-        appear when you call :meth:`MeanFunctionKernel._get_params()`.
-        """
-        names = []
-        if self.parametrize_variance:
-            names.append('variance')
-        if self.ARD:
-            names += ['kappa_%d' % i for i in range(self.num_basis)]
-        return names
-
-    def K(self, X, X2, target):
+    @Cache_this(limit=5, ignore_args=())
+    def K(self, X, X2=None):
         """
         Evaluate the covariance (or cross covariance matrix) at ``X`` and ``X2``.
         If ``X2`` is ``None`` the covariance matrix is computed. The result is
@@ -192,69 +140,24 @@ class MeanFunctionKernpart(Kern):
         # TODO: This should happen only once if X does not change!
         phi_X = self.basis(X)
         phi_X2 = phi_X if X2 is None or X2 is X else self.basis(X2)
-        target += (self.variance *
-                   np.einsum('ij,j,kj', phi_X, self.kappa, phi_X2))
+        return np.einsum('ij,j,kj', phi_X, self.variance, phi_X2)
 
-    def Kdiag(self, X, target):
+    @Cache_this(limit=5, ignore_args=())
+    def Kdiag(self, X):
         """
         Evaluate only the diagonal part of the covariance matrix at ``X`` and
         add it to ``target``.
         """
         phi_X = self.basis(X)
-        target += (self.variance *
-                   np.einsum('ij,j,ij->i', phi_X, self.kappa, phi_X))
+        return np.einsum('ij,j,ij->i', phi_X, self.variance, phi_X)
 
-    def dK_dtheta(self, dL_dK, X, X2, target):
+    def update_gradients_full(self, dL_dK, X, X2=None):
         """
-        Evaluate the contribution of this kernel to the derivative of the
-        likelihood with respect to each hyper-parameter. Now, ``dL_dK`` is the
-        partial derivative of the likelihood with respect to each component of
-        this covariance matrix (of shape ``X.shape[0] x X.shape[0]`` if ``X2``
-        is ``None`` and ``X.shape[0] x X2.shape[0]``, otherwise. This function
-        adds to ``target`` the final value of the derivative of the likelihood
-        with respect to each hyper-parameter, i.e.
-        ``target[i] += dL_dK[s, t] * (dK[s, t] / dtheta[i])`` in which
-        summation over ``s`` and ``t`` is implied.
+        Given the derivative of the objective wrt the covariance matrix
+        (dL_dK), compute the gradient wrt the parameters of this kernel,
+        and store in the parameters object as e.g. self.variance.gradient
         """
         phi_X = self.basis(X)
         phi_X2 = phi_X if X2 is None or X2 is X else self.basis(X2)
         i = 0
-        if self.parametrize_variance:
-            target[0] += np.einsum('ij,ik,k,jk', dL_dK, phi_X, self.kappa, phi_X2)
-            i = 1
-        if self.ARD:
-            target[i:] += (self.variance *
-                          np.einsum('ij,ik,jk->k', dL_dK, phi_X, phi_X2))
-
-
-def mean_function(input_dim, basis, variance=1., kappa=None, ARD=False,
-                  parametrize_variance=False):
-    """
-    Construct a kernel representing a mean function.
-
-    :param input_dim:   The number of inputs.
-    :type input_dim:    int
-    :param basis:       The basis. It should be a class that implements
-                        ``__call__(X)`` where X is a 2D numpy array with
-                        ``X.shape[1] == input_dim`` columns and returns the
-                        design matrix. In addition, it should at least have
-                        the attribute ``num_output`` which should store the
-                        number of basis functions.
-    :type basis:        any type that satisfies the consept of a basis function
-    :param variance:    The strength of the kernel. The smaller it is, the
-                        less important its contribution.
-    :type variance:     float
-    :param kappa:     The weight of each basis function. The closer it is to
-                        zero, the less important the corresponding basis
-                        function.
-    :type kappa:      :class:`numpy.ndarray`
-    :param ARD:         If ``ARD`` is ``True``, then the mean function behaves
-                        like a Relevance Vector Machine (RVM). If it is
-                        ``False`` then it is equivalent to a common mean
-                        function.
-    :type ARD:          bool
-    """
-    part = MeanFunctionKernpart(input_dim, basis, variance=variance,
-                                kappa=kappa, ARD=ARD,
-                                parametrize_variance=parametrize_variance)
-    return kern(input_dim, [part])
+        self.variance.gradient = np.einsum('ij,ik,jk->k', dL_dK, phi_X, phi_X2)
