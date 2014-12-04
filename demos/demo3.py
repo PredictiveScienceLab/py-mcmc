@@ -83,7 +83,7 @@ Y = np.dot(poly_basis(X), weights) + noise * np.random.randn(num_points)
 Y = Y[:, None]
 # Let's construct a GP model with just a mean and a diagonal covariance
 # This is the mean (and at the same time the kernel)
-mean = pm.mean_function(input_dim, poly_basis, ARD=True)
+mean = pm.MeanFunction(input_dim, poly_basis, ARD=True)
 # Now, let's construct the model
 model = GPy.models.GPRegression(X, Y, kernel=mean)
 print 'Model before training:'
@@ -104,11 +104,11 @@ plt.title('Model trained by maximizing the likelihood')
 plt.show()
 a = raw_input('press enter to continue...')
 # Or you might want to do it using MCMC:
-new_mean = pm.mean_function(input_dim, poly_basis, ARD=True)
+new_mean = pm.MeanFunction(input_dim, poly_basis, ARD=True)
 new_model = GPy.models.GPRegression(X, Y, kernel=new_mean)
 proposal = pm.MALAProposal(dt=0.1)
 mcmc = pm.MetropolisHastings(new_model, proposal=proposal)
-mcmc.sample(10000, num_thin=100, num_burn=1000, verbose=True)
+mcmc.sample(30000, num_thin=100, num_burn=1000, verbose=True)
 print 'Model trained with MCMC:'
 print str(new_model)
 # Plot everything for this too:
