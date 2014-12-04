@@ -55,7 +55,7 @@ class GPyModel(Model):
             if isinstance(g, float):
                 g = np.array([g] * self.num_params)
             self._state['grad_log_prior'] = self.model._transform_gradients(g)
-        self._state['params'] = self.model._get_params_transformed()
+        self._state['params'] = self.model.optimizer_array.copy()
 
     def __getstate__(self):
         return self._state
@@ -81,7 +81,7 @@ class GPyModel(Model):
 
     @params.setter
     def params(self, value):
-        self.model._set_params_transformed(value)
+        self.model.optimizer_array = value
         self._eval_state()
 
     @property

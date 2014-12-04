@@ -12,14 +12,13 @@ __all__ = ['Prior', 'GaussianPrior', 'LogGaussianPrior',
            'UninformativePrior']
 
 
-import GPy.core.domains as domains
-import GPy.core.priors as priors
+from GPy import priors
 Prior = priors.Prior
 GaussianPrior = priors.Gaussian
 LogGaussianPrior = priors.LogGaussian
 MultivariateGaussianPrior = priors.MultivariateGaussian
 GammaPrior = priors.Gamma
-InverseGammaPrior = priors.inverse_gamma
+InverseGammaPrior = priors.InverseGamma
 import numpy as np
 
 
@@ -29,7 +28,7 @@ class UninformativeScalePrior(Prior):
     An uninformative prior.
     """
 
-    domain = domains.POSITIVE
+    domain = priors._POSITIVE
 
     def lnpdf(self, x):
         """
@@ -75,13 +74,13 @@ class UninformativePrior(Prior):
         """
         assert lower < upper
         if lower == -np.inf and upper == np.inf:
-            self.domain = domains.REAL
+            self.domain = priors._REAL
             self.log_length = 0.
         elif lower == -np.inf or upper == np.inf:
-            self.domain = domains.BOUNDED
+            self.domain = priors._BOUNDED
             self.log_length = 0.
         else:
-            self.domain = domains.BOUNDED
+            self.domain = priors._BOUNDED
             self.log_length = np.log(upper - lower)
         self.lower = lower
         self.upper = upper
@@ -109,7 +108,7 @@ class UninformativePrior(Prior):
         """
         Return a string representation of the object.
         """
-        if (self.domain == domains.REAL or
+        if (self.domain == priors._REAL or
             self.upper == np.inf or
             self.lower == -np.inf):
             return 'Uninformative Prior: p(x) = 1'

@@ -13,12 +13,11 @@ Date:
 __all__ = ['MeanFunctionKernpart', 'mean_function']
 
 
-from GPy.kern import kern
-from GPy.kern import Kernpart
+from GPy.kern import Kern
 import numpy as np
 
 
-class MeanFunctionKernpart(Kernpart):
+class MeanFunctionKernpart(Kern):
 
     """
     A kernel representing a mean function.

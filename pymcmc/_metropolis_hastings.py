@@ -121,36 +121,42 @@ class MetropolisHastings(object):
         if self.has_db:
             self.db.add_proposal(self.proposal.__getstate__())
             self.db.create_new_chain()
-        # Start sampling
-        for i in xrange(num_samples):
-            # MCMC Step
-            new_state, log_p = self.proposal.propose(self.model)
-            log_u = math.log(np.random.rand())
-            if log_u <= log_p:
-                self.model.__setstate__(new_state)
-                self.accepted += 1
-            self.count += 1
-            # Output
-            if i > num_burn and i % num_thin == 0:
-                # To database
-                if self.has_db:
-                    self.db.add_chain_record(i + 1, self.accepted,
-                                             self.model.__getstate__())
-                # To user
-                if verbose:
-                    sys.stdout.write('sample ' + str(i + 1).zfill(len(str(num_samples)))
-                                     + ' of ' + str(num_samples)
-                                     + ', log_p: %.6f, acc. rate: %1.2f'
-                                       % (self.model.log_p, self.acceptance_rate)
-                                     + '\r')
-                    sys.stdout.flush() 
-            # Tuning
-            if isinstance(self.proposal, TunableProposalConcept):
-                if (i > 0 and
-                    i >= start_tuning_after and
-                    i % tuning_frequency == 0 and
-                    i <= stop_tuning_after):
-                    self.proposal.tune(self.acceptance_rate, verbose=verbose)
+        try:
+            # Start sampling
+            for i in xrange(num_samples):
+                # MCMC Step
+                new_state, log_p = self.proposal.propose(self.model)
+                log_u = math.log(np.random.rand())
+                if log_u <= log_p:
+                    self.model.__setstate__(new_state)
+                    self.accepted += 1
+                self.count += 1
+                # Output
+                if i > num_burn and i % num_thin == 0:
+                    # To database
+                    if self.has_db:
+                        self.db.add_chain_record(i + 1, self.accepted,
+                                                 self.model.__getstate__())
+                    # To user
+                    if verbose:
+                        sys.stdout.write('sample ' + str(i + 1).zfill(len(str(num_samples)))
+                                         + ' of ' + str(num_samples)
+                                         + ', log_p: %.6f, acc. rate: %1.2f'
+                                           % (self.model.log_p, self.acceptance_rate)
+                                         + '\r')
+                        sys.stdout.flush() 
+                # Tuning
+                if isinstance(self.proposal, TunableProposalConcept):
+                    if (i > 0 and
+                        i >= start_tuning_after and
+                        i % tuning_frequency == 0 and
+                        i <= stop_tuning_after):
+                        self.proposal.tune(self.acceptance_rate, verbose=verbose)
+        except KeyboardInterrupt:
+            if verbose:
+                sys.stdout.flush()
+                sys.stdout.write('\n')
+            print '*** Interrupting sampling'
 
         if verbose:
             sys.stdout.write('\n')

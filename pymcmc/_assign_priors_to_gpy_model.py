@@ -13,7 +13,9 @@ __all__ = ['assign_priors_to_gpy_model']
 
 
 import GPy
-from GPy.core.domains import POSITIVE, NEGATIVE, REAL, BOUNDED
+from GPy import priors
+POSITIVE = priors._POSITIVE
+REAL = priors._REAL
 import itertools
 from . import UninformativeScalePrior
 from . import UninformativePrior
@@ -30,7 +32,7 @@ def assign_priors_to_gpy_model(model):
       :class:`pymcmc.UninformativeScalePrior`.
     + If a parameter is constrained to be REAL, then it is assigned a
       :class:`pymcmc.UninformativePrior` with infinite bounds.
-    + If a parameter is constrained to be BOUNDED, then it is assigned a
+    + If a parameter is constrained to be REAL, then it is assigned a
       :class:`pymcmc.UninformativePrior` with (semi)-finite bounds.
 
     :param model:   The GPy model you want to assign uninformative priors to.
@@ -40,29 +42,11 @@ def assign_priors_to_gpy_model(model):
     param_names = model._get_param_names()
     if model.priors is None:
         model.priors = [None] * len(param_names)
-    # Loop over the constrains
-    for idx, c in itertools.izip(model.constrained_indices, model.constraints):
-        # Find the prior corresponding to constrain c
-        if c.domain == POSITIVE:
-            prior = UninformativeScalePrior()
-        elif c.domain == BOUNDED:
-            # This case requires a fix because of a bug in
-            # GPy.core.model.py:113
-            # They should allow for priors defined on a BOUNDED domain.
-            # TODO: Notify them so that they can change it.
-            # For now this case is done separately:
-            prior = UninformativePrior(lower=c.lower, upper=c.upper)
-            # START OF FIX FOR GPY BUG:
-            for i in idx:
-                if model.priors[i] is None:
-                    model.priors[i] = prior
-            continue
-            # END OF FIX FOR GPY BUG
-        for i in idx:
-            if model.priors[i] is None:
-                model.set_prior(param_names[i], prior)
-    # Any unconstrained indices should receive an unbounded UninformativePrior
-    unbounded_uninformative_prior = UninformativePrior()
-    for i in range(len(param_names)):
-        if model.priors[i] is None:
-            model.set_prior(param_names[i], unbounded_uninformative_prior)
+    # Loop over the parameters of the model
+    for mp in model.flattened_parameters:
+        print mp._constraints_str
+        if mp._constraints_str[0] == '+ve':
+            mp.set_prior(UninformativeScalePrior())
+        else:
+            print 'there'
+            mp.set_prior(UninformativePrior())
