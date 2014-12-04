@@ -79,6 +79,8 @@ I provide various demos demonstrating how the code can be used:
 
 
 Ilias Bilionis,
-January, 2014
-Mathematics and Computer Science Division,
-Argonne National Laboratory
+December, 2014
+PredictiveScience Laboratory,
+School of Mechanical Engineering,
+Purdue University,
+West Lafayette, IN, USA
