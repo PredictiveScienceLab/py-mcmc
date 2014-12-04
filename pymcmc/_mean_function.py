@@ -92,7 +92,7 @@ class MeanFunction(Kern):
         return self._ARD
 
     def __init__(self, input_dim, basis, variance=None, ARD=False,
-                 active_dims=None, name='Mean', useGP=False):
+                 active_dims=None, name='mean', useGP=False):
         """
         Initialize the object.
         """

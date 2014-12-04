@@ -58,7 +58,7 @@ class PolynomialBasis(object):
 
 
 # Pick your degree
-degree = 4
+degree = 5
 # Construct your basis
 poly_basis = PolynomialBasis(degree)
 # Let us generate some random data to play with
@@ -71,25 +71,26 @@ noise = 0.1
 # Observed inputs
 X = 20. * np.random.rand(num_points, 1) - 10.
 # The observations we make
-Y = np.sin(X) / X + noise * np.random.randn(num_points, 1) + 0.1 * X
+Y = np.sin(X) / X + noise * np.random.randn(num_points, 1) - 0.1 * X + 0.1 * X ** 3
 # Let's construct a GP model with just a mean and a diagonal covariance
 # This is the mean (and at the same time the kernel)
-mean = pm.mean_function(input_dim, poly_basis, ARD=True)
+mean = pm.MeanFunction(input_dim, poly_basis, ARD=True)
 # Add an RBF kernel
-kernel = GPy.kern.rbf(input_dim)
+kernel = GPy.kern.RBF(input_dim)
 # Now, let's construct the model
 model = GPy.models.GPRegression(X, Y, kernel=mean + kernel)
 print 'Model before training:'
 print str(model)
 # You may just train the model by maximizing the likelihood:
-model.optimize(messages=True)
+model.optimize_restarts(messages=True)
 print 'Trained model:'
 print str(model)
+print model.add.mean.variance
 # And just plot the predictions
 model.plot(plot_limits=(-10, 15))
 # Let us also plot the full function
 x = np.linspace(-10, 15, 100)[:, None]
-y = np.sin(x) / x + 0.1 * x
+y = np.sin(x) / x - 0.1 * x + 0.1 * x ** 3
 plt.plot(x, y, 'r', linewidth=2)
 plt.legend(['Mean of GP', '5% percentile of GP', '95% percentile of GP',
             'Observations', 'Real Underlying Function'], loc='best')
@@ -97,14 +98,15 @@ plt.title('Model trained by maximizing the likelihood')
 plt.show()
 a = raw_input('press enter to continue...')
 # Or you might want to do it using MCMC:
-new_mean = pm.mean_function(input_dim, poly_basis, ARD=True)
-new_kernel = GPy.kern.rbf(input_dim)
+new_mean = pm.MeanFunction(input_dim, poly_basis, ARD=True)
+new_kernel = GPy.kern.RBF(input_dim)
 new_model = GPy.models.GPRegression(X, Y, kernel=mean + new_kernel)
 proposal = pm.MALAProposal(dt=0.1)
 mcmc = pm.MetropolisHastings(new_model, proposal=proposal)
-mcmc.sample(20000, num_thin=100, num_burn=1000, verbose=True)
+mcmc.sample(50000, num_thin=100, num_burn=1000, verbose=True)
 print 'Model trained with MCMC:'
 print str(new_model)
+print new_model.add.mean.variance
 # Plot everything for this too:
 new_model.plot(plot_limits=(-10., 15.))
 # Let us also plot the full function
